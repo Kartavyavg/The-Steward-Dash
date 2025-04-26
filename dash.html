@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Steward Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-100">
+  <!-- Login/Signup Modal -->
+
+  <div id="authPage" class="min-h-screen flex flex-col  items-center justify-center p-6">
+    <h1 class="text-3xl items-center justify-center font-bold mb-4">Welcome to The Jr Skyrim Steward!</h1>
+    <h3 class="font-bold text-center mb-4">Plz Login!</h3>
+    <div class="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Product Code</label>
+        <input id="productCodeInput" type="text" class="mt-1 block w-full border rounded-md p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Password</label>
+        <input id="passwordInput" type="password" class="mt-1 block w-full border rounded-md p-2" required>
+      </div>
+      <div id="errorMsg" class="text-red-500 text-sm mb-2 hidden">Invalid credentials or product code.</div>
+      <div class="flex justify-between">
+        <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Login</button>
+        <button onclick="signup()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Sign Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboardPage" class="hidden p-6 space-y-6">
+
+    <div class="flex justify-center">
+      <!-- <h1 class="text-3xl font-bold ">THE Steward Dashboard</h1> -->
+       <img src="the.png" alt="">
+    </div>
+
+  <div class="flex justify-between items-center bg-white rounded-xl p-4 shadow w-full">
+    <!-- Left Section -->
+    <div class="text-sm text-gray-800">
+      <div class="flex items-start gap-2">
+        <span class="text-yellow-500 text-lg pt-1">🔒</span>
+        <div class="flex flex-col">
+          <span>
+            Product Code: <strong>SS-2025-ALPHA</strong>
+          </span>
+          <button id="toggleBtn" onclick="togglePassword()" class="text-blue-600 hover:underline text-sm mt-1 text-left">
+            Show Password
+          </button>
+          <div id="savedPassword" class="text-green-600 text-sm mt-1 hidden">
+            Saved Password: <strong>422818</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="flex gap-3">
+      <button onclick="refreshData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">
+        Reload Dashboard
+      </button>
+      <button onclick="exportPDF()"  class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium">
+        Export Report
+      </button>
+      <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-medium">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function togglePassword() {
+      const passDiv = document.getElementById('savedPassword');
+      const btn = document.getElementById('toggleBtn');
+      passDiv.classList.toggle('hidden');
+      btn.textContent = passDiv.classList.contains('hidden') ? 'Show Password' : 'Hide Password';
+    }
+
+    function reloadDashboard() {
+      alert("Dashboard Reloaded 🔁");
+    }
+
+    function exportReport() {
+      alert("Report Exported 📄");
+    }
+
+    function logout() {
+      alert("Logged Out 🚪");
+    }
+  </script>
+
+    <div id="dashboardContent" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left column -->
+      <div class="col-span-2 space-y-6">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">🐉 The AI Dragon Energy Meter</h2>
+          <canvas id="aiChart" class="w-full h-[300px]"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">📜 Quest Logs</h2>
+          <canvas id="distressChart" class="w-full h-[300px]"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">🦊 Companion Insights</h2>
+          <canvas id="medicineChart" class="w-full h-[300px]"></canvas>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="space-y-6">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">The Dragon Points </h2>
+          <canvas id="fallChart" class="w-full h-[300px]"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">Attribute Excellence</h2>
+          <canvas id="sensorChart" class="w-full h-[300px]"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h2 class="font-semibold mb-2">🧙 Combined Dragon Stats </h2>
+          <canvas id="combinedSensorChart" class="w-full h-[300px]"></canvas>
+        </div>
+
+
+        <!-- Skill Tree Section -->
+<div class="bg-white p-6 rounded-2xl shadow-lg max-w-2xl mx-auto mt-5">
+  <h2 class="text-xl font-bold text-center mb-4">🌌 Wellness Skill Tree</h2>
+  <canvas id="skillTreeChart" class="w-full h-80"></canvas>
+</div>
+
+<script>
+  new Chart(document.getElementById('skillTreeChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Sleep', 'Nutrition', 'Exercise', 'Hydration', 'Joy', 'Focus'],
+      datasets: [{
+        label: 'Today\'s Wellness',
+        data: [85, 70, 90, 75, 95, 80], // change values as needed
+        backgroundColor: 'rgba(139, 92, 246, 0.2)', // light violet
+        borderColor: '#8b5cf6', // vibrant violet
+        pointBackgroundColor: '#8b5cf6'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          angleLines: { display: false },
+          suggestedMin: 0,
+          suggestedMax: 100,
+          pointLabels: {
+            font: {
+              size: 14
+            }
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+</script>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PRODUCT_CODE = "SS-2025-ALPHA";
+    const DUMMY_KEYS = ["SS-2025-ALPHA", "SS-2025-BETA", "SS-2025-GAMMA", "SS-2025-DELTA", "SS-2025-OMEGA"];
+    let aiChart;
+
+    window.onload = function () {
+      for (const code of DUMMY_KEYS) {
+        const stored = localStorage.getItem(`user_${code}`);
+        if (stored) {
+          document.getElementById("authPage").classList.add("hidden");
+          document.getElementById("dashboardPage").classList.remove("hidden");
+          initDashboard();
+          break;
+        }
+      }
+    }
+
+    function login() {
+      const code = document.getElementById("productCodeInput").value;
+      const pass = document.getElementById("passwordInput").value;
+      const stored = localStorage.getItem(`user_${code}`);
+
+      if (DUMMY_KEYS.includes(code) && stored === pass) {
+        document.getElementById("authPage").classList.add("hidden");
+        document.getElementById("dashboardPage").classList.remove("hidden");
+        initDashboard();
+      } else {
+        document.getElementById("errorMsg").classList.remove("hidden");
+      }
+    }
+
+    function signup() {
+      const code = document.getElementById("productCodeInput").value;
+      const pass = document.getElementById("passwordInput").value;
+
+      if (DUMMY_KEYS.includes(code)) {
+        localStorage.setItem(`user_${code}`, pass);
+        alert("Signup successful! You can now login.");
+      } else {
+        document.getElementById("errorMsg").innerText = "Invalid product code.";
+        document.getElementById("errorMsg").classList.remove("hidden");
+      }
+    }
+
+    function logout() {
+      for (const code of DUMMY_KEYS) {
+        localStorage.removeItem(`user_${code}`);
+      }
+      location.reload();
+    }
+
+    function togglePassword() {
+      document.getElementById("savedPassword").classList.toggle("hidden");
+    }
+
+    function refreshData() {
+      location.reload();
+    }
+
+    async function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const content = document.getElementById("dashboardPage");
+
+      await html2canvas(content).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const imgProps = doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        doc.save("SmartDashboard_Report.pdf");
+      });
+    }
+
+    function initDashboard() {
+      aiChart = new Chart("aiChart", {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 10 }, (_, i) => `${i + 1}`),
+          datasets: [{
+            label: "Burnout Risk %",
+            data: Array.from({ length: 10 }, () => Math.floor(Math.random() * 30) + 50),
+            borderColor: "rgb(16 185 129)",
+            fill: true
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      setInterval(() => {
+        aiChart.data.labels.push(aiChart.data.labels.length + 1);
+        aiChart.data.datasets[0].data.push(Math.floor(Math.random() * 30) + 50);
+        if (aiChart.data.labels.length > 20) {
+          aiChart.data.labels.shift();
+          aiChart.data.datasets[0].data.shift();
+        }
+        aiChart.update();
+      }, 2000);
+
+      new Chart("distressChart", {
+        type: 'line',
+        data: {
+          labels: ["10am", "12pm", "2pm", "4pm"],
+          datasets: [{ label: "No. of Missions Accomplished", data: [1, 2, 1, 3], borderColor: "#facc15" }]
+        }
+      });
+
+      new Chart("medicineChart", {
+        type: 'bar',
+        data: {
+          labels: ["Morning", "Noon", "Evening"],
+          datasets: [{ label: "No. of Friends", data: [1, 5, 8], backgroundColor: "#34d399" }]
+        }
+      });
+
+      new Chart("fallChart", {
+        type: 'bar',
+        data: {
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+          datasets: [{ label: "Points", data: [2, 5, 1, 3, 4], backgroundColor: "#60a5fa" }]
+        }
+      });
+
+      new Chart("sensorChart", {
+        type: 'pie',
+        data: {
+          labels: ["Energy ⚡", "Joy 😃", "Focus 💎"],
+          datasets: [{ data: [30, 50, 20], backgroundColor: ["#fbbf24", "#60a5fa", "#a78bfa"] }]
+        }
+      });
+
+      new Chart("combinedSensorChart", {
+        type: 'line',
+        data: {
+          labels: ["10am", "11am", "12pm", "1pm"],
+          datasets: [
+            { label: "Energy ⚡", data: [22, 2, 24, 23], borderColor: "#f97316" },
+            { label: "Joy 😃", data: [10, 15, 43, 12], borderColor: "#3b82f6" },
+            { label: "Focus 💎", data: [45, 50, 7, 47], borderColor: "#8b5cf6" }
+          ]
+        }
+      });
+    }
+  </script>
+</body>
+</html>
